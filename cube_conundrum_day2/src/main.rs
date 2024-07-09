@@ -14,11 +14,65 @@ struct Game {
 }
 
 fn main() {
+    solution1();
+    solution2();
+}
+
+fn solution2() {
+    let games = parse_game();
+    let res = games.iter().map(|game| get_game_power(game)).sum::<u32>();
+    dbg!(res);
+}
+
+fn get_game_power(game: &Game) -> u32 {
+    let mut blue: u32 = 0;
+    let mut green: u32 = 0;
+    let mut red: u32 = 0;
+    for round in game.rounds.iter() {
+        if round.blue >= blue {
+            blue = round.blue;
+        }
+        if round.green >= green {
+            green = round.green;
+        }
+        if round.red >= red {
+            red = round.red;
+        }
+    }
+    blue * red * green
+}
+
+fn solution1() {
     const BAG_STATE: Draw = Draw {
         red: 12,
         green: 13,
         blue: 14,
     };
+    let games = parse_game();
+    let res = games.iter().map(|game| validate_game(game, &BAG_STATE));
+    dbg!(res.sum::<u32>());
+}
+
+fn validate_draw(draw: &Draw, bag_state: &Draw) -> bool {
+    draw.blue <= bag_state.blue && draw.red <= bag_state.red && draw.green <= bag_state.green
+}
+
+fn validate_game(game: &Game, bag_state: &Draw) -> u32 {
+    if game
+        .rounds
+        .iter()
+        .all(|draw| validate_draw(draw, bag_state))
+    {
+        return game.game_number;
+    }
+    0
+}
+
+fn read_input() -> String {
+    return fs::read_to_string("./input.txt").expect("Could not read from input file!");
+}
+
+fn parse_game() -> Vec<Game> {
     let input = read_input();
     let mut games: Vec<Game> = vec![];
     for line in input.lines() {
@@ -68,25 +122,5 @@ fn main() {
         };
         games.push(game);
     }
-    let res = games.iter().map(|game| validate_game(game, &BAG_STATE));
-    dbg!(res.sum::<u32>());
-}
-
-fn validate_draw(draw: &Draw, bag_state: &Draw) -> bool {
-    draw.blue <= bag_state.blue && draw.red <= bag_state.red && draw.green <= bag_state.green
-}
-
-fn validate_game(game: &Game, bag_state: &Draw) -> u32 {
-    if game
-        .rounds
-        .iter()
-        .all(|draw| validate_draw(draw, bag_state))
-    {
-        return game.game_number;
-    }
-    0
-}
-
-fn read_input() -> String {
-    return fs::read_to_string("./input.txt").expect("Could not read from input file!");
+    return games;
 }

@@ -5,8 +5,40 @@ fn main() {
     solution2();
 }
 
+fn read_file() -> String {
+    fs::read_to_string("./input.txt").expect("Could not read from input file!")
+}
+
+fn solution1() {
+    let input: String = read_file();
+    let only_ints: Vec<_> = input
+        .lines()
+        .into_iter()
+        .map(|val| val.chars().filter(|c| c.is_numeric()))
+        .map(|n| n.collect::<String>())
+        .collect();
+
+    let res: u32 = only_ints
+        .into_iter()
+        .map(|s| {
+            s.chars()
+                .next()
+                .map(|c| {
+                    s.chars().next_back().map(|k| {
+                        (c.to_string() + &(k.to_string()))
+                            .parse::<u32>()
+                            .expect("Could not form a int from the two substrings!")
+                    })
+                })
+                .flatten()
+        })
+        .flatten()
+        .sum::<u32>();
+    dbg!(res);
+}
+
 fn solution2() {
-    let input: String = fs::read_to_string("./input.txt").expect("Could not read from input file!");
+    let input: String = read_file();
     let results: Vec<_> = input
         .lines()
         .into_iter()
@@ -41,32 +73,4 @@ fn replace_ascci_num(line: &str) -> String {
     }
     let r = String::from(&line[0..1]) + &(replace_ascci_num(&line[1..]));
     return r;
-}
-
-fn solution1() {
-    let input: String = fs::read_to_string("./input.txt").expect("Could not open file");
-    let ints: Vec<_> = input
-        .lines()
-        .into_iter()
-        .map(|val| val.chars().filter(|c| c.is_numeric()))
-        .map(|n| n.collect::<String>())
-        .collect();
-
-    let res: u32 = ints
-        .into_iter()
-        .map(|s| {
-            s.chars()
-                .next()
-                .map(|c| {
-                    s.chars().next_back().map(|k| {
-                        (c.to_string() + &(k.to_string()))
-                            .parse::<u32>()
-                            .expect("Could not form a int from the two substrings!")
-                    })
-                })
-                .flatten()
-        })
-        .flatten()
-        .sum::<u32>();
-    dbg!(res);
 }
